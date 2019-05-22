@@ -8,8 +8,15 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the req
 ```bash
 pip install -r requirements.txt
 ```
+
+## Running tests(Optional)
+type
+```bash
+python3 -m unittest test tests.py
+```
+
 ## Excecution
-Just write
+Just type
 ```bash
 python main.py
 ```

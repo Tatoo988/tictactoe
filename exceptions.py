@@ -1,0 +1,3 @@
+
+class AlreadyBusyException(Exception):
+    pass

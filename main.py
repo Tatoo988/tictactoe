@@ -4,6 +4,8 @@ from time import sleep
 
 import numpy as np
 
+from exceptions import AlreadyBusyException
+
 
 class TicTacToe(object):
 
@@ -28,12 +30,19 @@ class TicTacToe(object):
         :param position: a tuple containing the coordinates of the piece
         :return: nothing
         """
-        self.board[position[0], position[1]] = piece
-        self.busy_spots.append(position)
-        self.free_spots.remove(position)
+        if position not in self.busy_spots:
+            self.board[position[0], position[1]] = piece
+            self.busy_spots.append(position)
+            self.free_spots.remove(position)
+        else:
+            raise AlreadyBusyException("That place already got's a piece.")
 
     @property
     def are_free_spots(self):
+        """
+        property yo check if there are still free spots on the board
+        :return:
+        """
         return len(self.free_spots) != 0
 
     def who_goes_first(self):
@@ -48,26 +57,63 @@ class TicTacToe(object):
         self.pieces.insert(0, self.pieces.pop(self.pieces.index(self.starting_piece)))
 
     def player_move(self):
-        print("your turn:")
-        row_coordinate = int(input("Enter a row coordinate to row x of the board: "))
-        col_coordinate = int(input("Enter a column coordinate to column x of the board: "))
-        self.place_piece(self.player_piece_choice, (row_coordinate, col_coordinate))
+        """
+        This function simulates the piece placement for the player. Asks for coordinates and tries to put
+        the piece
+        :return: nothing
+        """
+        while True:
+            print("Your turn:")
+            try:
+                row_coordinate = int(input("Enter a row coordinate to row x of the board: "))
+                col_coordinate = int(input("Enter a column coordinate to column x of the board: "))
+                self.place_piece(self.player_piece_choice, (row_coordinate, col_coordinate))
+                break
+            except ValueError:
+                print("The value you inserted is not valid. Try again")
+            except AlreadyBusyException as e:
+                print(e)
+            except IndexError:
+                print("Incorrect Coordinates. Values must be between 0 and 2")
 
     def computer_move(self, piece):
+        """
+        Function to simulate the piece placement of the computer
+        :param piece: the piece
+        :return: Nothing
+        """
         print("Computer turn: ")
+        sleep(1)
         empty_place = self.get_random_empty_place()
         self.place_piece(piece, empty_place)
 
     def print_board(self):
+        """
+        Just Prints the board
+        :return: Nothing
+        """
         print(self.board)
 
     def is_player_turn(self, piece):
+        """
+        Checks if it is the player turn
+        :param piece: the piece turn
+        :return: True if it is the player's turn
+        """
         return self.player_piece_choice == piece
 
     def play(self):
-        piece_choice = str(input("Choose your pieces: X or O:"))
-        if piece_choice not in ("X", "O"):
-            print("wrong choice, try again")
+        """
+        function to play. it will create a cycle that will only finish when there is a winner
+        or if there are no more moves and no one won(a deuce)
+        :return: Nothing
+        """
+        while True:
+            piece_choice = str(input("Choose your pieces: X or O:"))
+            if piece_choice not in ("X", "O"):
+                print("wrong choice, try again")
+            else:
+                break
         self.player_piece_choice = piece_choice
         self.who_goes_first()
         result = None
@@ -79,10 +125,10 @@ class TicTacToe(object):
                     self.computer_move(piece)
                 self.print_board()
                 result = self.check_board()
-                if result is not None:
+                if result:
                     raise StopIteration
         except StopIteration:
-            print("END OF THE GAME Result: {} {}".format(result, "Wins" if result is not "DEUCE" else ""))
+            print("END OF THE GAME Result: {} {}".format(result, "Wins !" if result is not "DEUCE" else ""))
 
     def check_board(self):
         """
